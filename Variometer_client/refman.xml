@@ -1,0 +1,348 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Variometer_client</name>
+    </assembly>
+    <members>
+        <member name="M:Variometer_client.Program.Main">
+            <summary>
+            The main entry point for the application.
+            </summary>
+        </member>
+        <member name="T:Variometer_client.frmTransfer">
+            <summary>
+            Az adatátvitellel összefüggő feladatok ellátására.
+            </summary>
+        </member>
+        <member name="F:Variometer_client.frmTransfer.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.#ctor">
+            <summary>
+            Konstruktor.
+            Beállítja a timerek paramétereit.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.frmTransfer_Load(System.Object,System.EventArgs)">
+            <summary>
+            Az ablak betöltése előtt felderíti a csatlakoztatott variométert.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.btnOK_Click(System.Object,System.EventArgs)">
+            <summary>
+            Megvizsgálja, hogy minden feltétel adott-e az adatátvitelhez, illetve,
+            ha a repülési helyszín nem létezik még az adatbázisban, akkor létrehozza.
+            Amennyiben minden rendben van, elindítja az adatok áttöltését.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.serialCommCb(Variometer_client.SerialComm.rDataS)">
+            <summary>
+            Callback függvény, mely az "Adat érkezett a soros porta" esemény hatására hívódik.
+            </summary>
+            <param name="data">
+            A soros porton érkezett adat és a bytok száma.
+            Ha a struktúra count eleme == 65535, akkor hiba történt.
+            </param>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.onTimerTick(System.Object,System.EventArgs)">
+            <summary>
+            A read timeout időzítő eseménykezelője.
+            Ha adott időn belül nem érkezik adat a soros porton, hibának tekintjük.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.onPTimerTick(System.Object,System.EventArgs)">
+            <summary>
+            A progress bar időzítőjének eseménykezelője.
+            Erre azért volt szükség, mert az "Adat érkezett" esemény nem a beállított
+            küszöbértéknél hívódik meg, mert az operációs rendszer felülbírálja, így
+            csak minden 4096. bájt után történik a hívás. Ezért a progress bár sokáig
+            egy helyben állna, ami megtévesztő lehet. Ezzel az időzítővel lassan léptetem előre.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.ByteArrayToLogRec(System.Byte[]@)">
+            <summary>
+            Deserializer - Bájt tömbről log_rec_t típusra alakítja a kapott adatokat.
+            </summary>
+            <param name="bytes">
+            Az szétbontandó adatbájtok tömbje.
+            </param>
+            <returns>
+            log_rec_t - az átalakított adat.
+            </returns>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.AddText(System.String)">
+            <summary>
+            Delegált függvény, ami másik szálból is hívható.
+            A formon elhelyzkedő címke szövegét módosítja.
+            </summary>
+            <param name="textToAdd">
+            A kiírandó szöveg.
+            </param>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.SetProgressBar(System.Int32,System.Int32)">
+            <summary>
+            Delegált függvény, ami másik szálból is hívható.
+            A formon elhelyzkedő progress bar értékeit módosítja.
+            </summary>
+            <param name="value">
+            A progress bar értéke.
+            </param>
+            <param name="maxValue">
+            A progress bar felső határértéke.
+            </param>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.SetControlsEnabled(System.Boolean)">
+            <summary>
+            Delegált függvény, ami másik szálból is hívható.
+            A formon elhelyzkedő vezérlők állapotát módosítja.
+            </summary>
+            <param name="isEnabled">
+            True esetén a vezérlők engedélyezettek, false esetén tiltottak lesznek.
+            </param>
+        </member>
+        <member name="M:Variometer_client.frmTransfer.fillPlaces">
+            <summary>
+            A formon elhelyzkedő repülési helyszíneket tartalmazó ComboBoxot tölti fel.
+            </summary>
+        </member>
+        <member name="T:Variometer_client.MainForm">
+            <summary>
+            A főablak.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MainForm.MainForm_Load(System.Object,System.EventArgs)">
+            <summary>
+            Az ablak betöltődésekor csatlakozik az adatbáziskezelőhöz,
+            szükség esetén létrehozza az adatbázist és tábláit, valamint
+            feltölti az ablak bal oldalán lévő TreeView-t.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MainForm.tsbLoad_Click(System.Object,System.EventArgs)">
+            <summary>
+            Megnyitja az adatok áttöltésére szolgáló párbeszéd ablakot.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MainForm.fillTreeView(System.Windows.Forms.TreeView@)">
+            <summary>
+            Feltölti az ablak bal oldalán lévő TreeView-t az adatbázisból.
+            </summary>
+            <param name="tw">
+            A feltöltendő TreeView objektum referenciája.
+            </param>
+        </member>
+        <member name="M:Variometer_client.MainForm.twFlies_AfterSelect(System.Object,System.Windows.Forms.TreeViewEventArgs)">
+            <summary>
+            A TreeView-ben történt kattintást kezeli le.
+            Amennyiben 2. szintű elemre történt a kattintás, a diagramot megrajzolja.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MainForm.tsbPrint_Click(System.Object,System.EventArgs)">
+            <summary>
+            Kinyomtatja a diagramot.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MainForm.tsbExport_Click(System.Object,System.EventArgs)">
+            <summary>
+            XML fájlba menti, exportálja a kijelölt repülés adatait.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MainForm.chkAltitude_CheckedChanged(System.Object,System.EventArgs)">
+            <summary>
+            Kiválasztható, hogy a diagramon a magasság értékek megjelenjenek-e.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MainForm.chkSpeed_CheckedChanged(System.Object,System.EventArgs)">
+            <summary>
+            Kiválasztható, hogy a diagramon a sebesség értékek megjelenjenek-e.
+            </summary>
+        </member>
+        <member name="F:Variometer_client.MainForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MainForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Variometer_client.MainForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Variometer_client.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Variometer_client.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Variometer_client.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Variometer_client.Properties.Resources.download">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Variometer_client.Properties.Resources.print">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Variometer_client.Properties.Resources.publish">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Variometer_client.Properties.Resources.publish1">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Variometer_client.Properties.Resources.transfer">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="T:Variometer_client.MsSQL">
+            <summary>
+            MS SQL szerverrel összefüggő feladatok ellátására.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.MsSQL.connectToDatabase(System.Windows.Forms.Form@)">
+            <summary>
+            Kapcsolódás az adatbáziskezelőhöz, hiba esetén hibaüzenet.
+            </summary>
+            <param name="caller">
+            A hívó objektum.
+            </param>
+            <returns>
+            Boolean - true, ha a kapcsloódás sikeres, egyébként false.
+            </returns>
+        </member>
+        <member name="M:Variometer_client.MsSQL.createDBifNotExists(System.Windows.Forms.Form@)">
+            <summary>
+            Létrehozza az adatbázist és a szükséges táblákat, ha nem léteznek.
+            </summary>
+            <param name="caller">
+            A hívó objektum.
+            </param>
+            <returns>
+            Boolean - true, ha a létrehozás sikeres, egyébként false.
+            </returns>
+        </member>
+        <member name="M:Variometer_client.MsSQL.loadDataToDB(System.Collections.Generic.List{Variometer_client.frmTransfer.log_rec_t}@,System.Int32,Variometer_client.frmTransfer)">
+            <summary>
+            Beírja az adatbázisba a variométerről áttöltött adatokat.
+            </summary>
+            <param name="logRecord">
+            log_rec_t típusú elemeket tartalmazó lista.
+            </param>
+            <param name="placeID">
+            A repülés helyének azonosítója a Places tábla alpján.
+            </param>
+            <param name="caller">
+            A hívó objektum.
+            </param>
+            <returns>
+            Boolean - true, ha a létrehozás sikeres, egyébként false.
+            </returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Variometer_client.MsSQL.getPlaces" -->
+        <member name="M:Variometer_client.MsSQL.insertNewPlace(System.String)">
+            <summary>
+            Új repülési helyszín hozzáadása a Places táblához.
+            </summary>
+            <param name="place">
+            A helyszín neve.
+            </param>
+        </member>
+        <member name="T:Variometer_client.SerialComm">
+            <summary>
+            A soros port kezelésével összefüggő feladatok ellátására.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.SerialComm.#ctor">
+            <summary>
+            A konstruktor beállítja a soros port paramétereit.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.SerialComm.Finalize">
+            <summary>
+            Destruktor.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.SerialComm.onSerialErrorReveived(System.Object,System.IO.Ports.SerialErrorReceivedEventArgs)">
+            <summary>
+            A soros port hiba eseményeit kezeli.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.SerialComm.onSerialDataReveived(System.Object,System.IO.Ports.SerialDataReceivedEventArgs)">
+            <summary>
+            A soros portra "Adat érkezett" eseményt kezeli.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Variometer_client.SerialComm.exploreDevice" -->
+        <member name="M:Variometer_client.SerialComm.OpenPort(System.String)">
+            <summary>
+            Az adott soros port megnyitása.
+            </summary>
+            <param name="port">
+            A soros port neve.
+            </param>
+            <returns>
+            Boolean - true, ha a port nyitása sikeres volt, egyébként false.
+            </returns>
+        </member>
+        <member name="M:Variometer_client.SerialComm.Write(System.Byte[]@)">
+            <summary>
+            Adatok küldése a soros porton keresztül.
+            </summary>
+            <param name="toWrite">
+            Az írandó bájtok.
+            </param>
+            <returns>
+            Boolean - true, ha a küldés sikeres volt, egyébként false.
+            </returns>
+        </member>
+        <member name="M:Variometer_client.SerialComm.ClosePort">
+            <summary>
+            A soros port lezárása.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.SerialComm.StartRead">
+            <summary>
+            Engedélyezi a port olvasását úgy, hogy hozzáad egy event handlert a port objektumhoz.
+            </summary>
+        </member>
+        <member name="M:Variometer_client.SerialComm.StopRead">
+            <summary>
+            Leállítja a port olvasását úgy, hogy törli az event handlert a port objektumból.
+            </summary>
+        </member>
+    </members>
+</doc>
